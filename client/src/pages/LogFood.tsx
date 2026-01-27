@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { useLogs, useCustomFoods, useSettings } from "@/lib/storage";
+import { useState, useRef } from "react";
+import { useLogs, useCustomFoods } from "@/lib/storage";
 import { COMMON_FOODS } from "@/lib/mock-data";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { Search, Plus, ArrowRight, Utensils } from "lucide-react";
+import { Search, Plus, ArrowRight, Camera, Upload, ScanLine, Loader2, AlertCircle, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,16 +16,25 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card"; // Added import
+import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function LogFood() {
-  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState("scan");
   const [selectedMeal, setSelectedMeal] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('breakfast');
-  const [activeTab, setActiveTab] = useState("search");
   
-  // Custom Food Form State
-  const [customName, setCustomName] = useState("");
-  const [customCals, setCustomCals] = useState("");
+  // Search State
+  const [search, setSearch] = useState("");
+  
+  // Scan/Upload State
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analyzedImage, setAnalyzedImage] = useState<string | null>(null);
+  const [scanResult, setScanResult] = useState<{name: string, calories: number} | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Form State (for manual or post-scan editing)
+  const [foodName, setFoodName] = useState("");
+  const [foodCalories, setFoodCalories] = useState("");
   
   const { addLog } = useLogs();
   const { customFoods, addCustomFood } = useCustomFoods();
@@ -33,64 +42,104 @@ export default function LogFood() {
   const { toast } = useToast();
 
   const allFoods = [...COMMON_FOODS, ...customFoods];
-  
   const filteredFoods = allFoods.filter(food => 
     food.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleQuickAdd = (food: typeof allFoods[0]) => {
+    saveLog(food.name, food.calories, food.id);
+  };
+
+  const saveLog = (name: string, calories: number, foodId?: string) => {
     addLog({
       date: format(new Date(), 'yyyy-MM-dd'),
-      name: food.name,
-      calories: food.calories,
+      name: name,
+      calories: calories,
       meal: selectedMeal,
-      foodId: food.id
+      foodId: foodId
     });
     
     toast({
       title: "Food Logged!",
-      description: `Added ${food.name} (${food.calories} kcal) to ${selectedMeal}.`,
+      description: `Added ${name} (${calories} kcal) to ${selectedMeal}.`,
       duration: 2000,
     });
     
     setLocation("/");
   };
 
-  const handleCustomSubmit = (e: React.FormEvent) => {
+  const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customName || !customCals) return;
+    if (!foodName || !foodCalories) return;
     
-    const calories = parseInt(customCals);
+    const calories = parseInt(foodCalories);
     
-    // Add to custom foods so it's searchable later
-    addCustomFood({
-      name: customName,
-      calories: calories,
-      protein: 0, carbs: 0, fat: 0, // Simplified for now
-      servingSize: '1 serving'
-    });
+    // If it's a new custom food (not from scan), add to custom foods
+    if (!scanResult) {
+      addCustomFood({
+        name: foodName,
+        calories: calories,
+        protein: 0, carbs: 0, fat: 0, 
+        servingSize: '1 serving'
+      });
+    }
 
-    // Log it immediately
-    addLog({
-      date: format(new Date(), 'yyyy-MM-dd'),
-      name: customName,
-      calories: calories,
-      meal: selectedMeal,
-    });
+    saveLog(foodName, calories);
+  };
 
-    toast({
-      title: "Custom Food Added",
-      description: `Added ${customName} to your log and saved list.`,
-    });
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAnalyzedImage(e.target?.result as string);
+        analyzeImage();
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const analyzeImage = () => {
+    setIsAnalyzing(true);
+    setScanResult(null);
     
-    setLocation("/");
+    // Mock analysis - simulate network request
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      
+      // Mock result
+      const mockResults = [
+        { name: "Avocado Toast", calories: 350 },
+        { name: "Grilled Chicken Salad", calories: 420 },
+        { name: "Pasta Carbonara", calories: 650 },
+        { name: "Berry Smoothie Bowl", calories: 280 },
+      ];
+      const randomResult = mockResults[Math.floor(Math.random() * mockResults.length)];
+      
+      setScanResult(randomResult);
+      setFoodName(randomResult.name);
+      setFoodCalories(randomResult.calories.toString());
+      
+      toast({
+        title: "Analysis Complete",
+        description: "We've estimated the calories. Please verify.",
+      });
+    }, 2500);
+  };
+
+  const resetScan = () => {
+    setAnalyzedImage(null);
+    setScanResult(null);
+    setFoodName("");
+    setFoodCalories("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-24">
       <div className="space-y-1">
         <h1 className="text-3xl font-bold">Log Food</h1>
-        <p className="text-muted-foreground">Add a meal to your daily tracking.</p>
+        <p className="text-muted-foreground">Snap a photo or search to track.</p>
       </div>
 
       <div className="bg-card border rounded-2xl p-4 space-y-4 shadow-sm">
@@ -110,21 +159,139 @@ export default function LogFood() {
         </div>
       </div>
 
-      <Tabs defaultValue="search" value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="scan" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 h-12 mb-6">
-          <TabsTrigger value="search" className="text-base">Search Food</TabsTrigger>
-          <TabsTrigger value="custom" className="text-base">Quick Add</TabsTrigger>
+          <TabsTrigger value="scan" className="text-base">Scan Meal</TabsTrigger>
+          <TabsTrigger value="search" className="text-base">Search / Type</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="search" className="space-y-4 animate-in slide-in-from-left-4 duration-300">
+        {/* SCAN TAB */}
+        <TabsContent value="scan" className="space-y-6 animate-in slide-in-from-left-4 duration-300">
+          {!analyzedImage ? (
+            <div className="grid gap-4">
+              <input 
+                type="file" 
+                accept="image/*" 
+                capture="environment"
+                className="hidden" 
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+              />
+              
+              <Button 
+                onClick={() => fileInputRef.current?.click()}
+                className="h-48 w-full rounded-3xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 flex flex-col gap-4 text-primary shadow-sm hover:shadow-md transition-all"
+                variant="outline"
+              >
+                <div className="p-4 bg-primary/20 rounded-full">
+                  <Camera className="w-10 h-10 stroke-[1.5]" />
+                </div>
+                <div className="space-y-1 text-center">
+                  <span className="text-xl font-bold block">Take Photo</span>
+                  <span className="text-sm opacity-80">Scan your meal instantly</span>
+                </div>
+              </Button>
+
+              <div className="text-center text-muted-foreground text-sm font-medium my-2">- OR -</div>
+
+              <Button 
+                variant="secondary" 
+                className="h-14 w-full text-lg font-medium"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="w-5 h-5 mr-2" /> Upload from Gallery
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="relative rounded-3xl overflow-hidden shadow-lg border bg-black/5 aspect-video md:aspect-[4/3] group">
+                <img src={analyzedImage} alt="Analyzed food" className="w-full h-full object-cover" />
+                
+                <Button 
+                  size="icon" 
+                  variant="secondary" 
+                  className="absolute top-2 right-2 rounded-full opacity-80 hover:opacity-100"
+                  onClick={resetScan}
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+
+                {isAnalyzing && (
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center text-white p-6 text-center">
+                    <Loader2 className="w-12 h-12 animate-spin mb-4" />
+                    <h3 className="text-xl font-bold">Analyzing your meal...</h3>
+                    <p className="text-white/80 text-sm mt-2">Identifying food and estimating calories</p>
+                  </div>
+                )}
+                
+                {!isAnalyzing && scanResult && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-12 text-white">
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-white/80 uppercase tracking-wider mb-1">Identified</p>
+                        <h3 className="text-2xl font-bold">{scanResult.name}</h3>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-3xl font-bold block">{scanResult.calories}</span>
+                        <span className="text-sm text-white/80">kcal (est)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {!isAnalyzing && scanResult && (
+                <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
+                  <Alert variant="default" className="bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Estimation Only</AlertTitle>
+                    <AlertDescription>
+                      This is an AI estimate. Please verify portion size and ingredients.
+                    </AlertDescription>
+                  </Alert>
+
+                  <Card className="p-6">
+                    <form onSubmit={handleManualSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Food Name</Label>
+                        <Input 
+                          value={foodName} 
+                          onChange={(e) => setFoodName(e.target.value)} 
+                          className="font-medium"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Calories</Label>
+                        <div className="relative">
+                          <Input 
+                            type="number" 
+                            value={foodCalories} 
+                            onChange={(e) => setFoodCalories(e.target.value)} 
+                            className="pl-10 font-medium"
+                          />
+                          <div className="absolute left-3 top-2.5 font-bold text-muted-foreground">⚡</div>
+                        </div>
+                      </div>
+                      <Button type="submit" className="w-full h-12 text-lg">
+                        Confirm & Log Entry <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </form>
+                  </Card>
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* SEARCH / MANUAL TAB */}
+        <TabsContent value="search" className="space-y-6 animate-in slide-in-from-right-4 duration-300">
           <div className="relative">
             <Search className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
             <Input 
-              placeholder="Search (e.g., 'Apple', 'Pizza')..." 
+              placeholder="Search food database..." 
               className="pl-10 h-12 text-lg rounded-xl"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              autoFocus
             />
           </div>
 
@@ -149,50 +316,45 @@ export default function LogFood() {
             ))}
             
             {filteredFoods.length === 0 && (
-              <div className="text-center py-10 text-muted-foreground">
-                <p>No foods found matching "{search}"</p>
-                <Button variant="link" onClick={() => setActiveTab("custom")}>
-                  Create custom entry instead
-                </Button>
+              <div className="text-center py-6">
+                <p className="text-muted-foreground mb-4">No results for "{search}"</p>
+                <div className="border-t pt-6">
+                  <h3 className="font-medium mb-4">Add Manually</h3>
+                  <Card className="p-6 border-dashed border-2 shadow-none bg-secondary/20">
+                    <form onSubmit={handleManualSubmit} className="space-y-4">
+                      <div className="space-y-2 text-left">
+                        <Label>Food Name</Label>
+                        <Input 
+                          placeholder="e.g. Grandma's Lasagna" 
+                          value={foodName}
+                          onChange={(e) => setFoodName(e.target.value)}
+                          className="bg-background"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2 text-left">
+                        <Label>Calories</Label>
+                        <div className="relative">
+                          <Input 
+                            type="number" 
+                            placeholder="0" 
+                            value={foodCalories}
+                            onChange={(e) => setFoodCalories(e.target.value)}
+                            className="pl-10 bg-background"
+                          />
+                          <div className="absolute left-3 top-2.5 font-bold text-muted-foreground">⚡</div>
+                        </div>
+                      </div>
+
+                      <Button type="submit" className="w-full h-12 text-lg" disabled={!foodName || !foodCalories}>
+                        Add to Log <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </form>
+                  </Card>
+                </div>
               </div>
             )}
           </div>
-        </TabsContent>
-
-        <TabsContent value="custom" className="animate-in slide-in-from-right-4 duration-300">
-          <Card className="p-6 border-dashed border-2 shadow-none bg-secondary/20">
-            <form onSubmit={handleCustomSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Food Name</Label>
-                <Input 
-                  id="name" 
-                  placeholder="e.g. Grandma's Lasagna" 
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  className="bg-background"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="calories">Calories</Label>
-                <div className="relative">
-                  <Input 
-                    id="calories" 
-                    type="number" 
-                    placeholder="0" 
-                    value={customCals}
-                    onChange={(e) => setCustomCals(e.target.value)}
-                    className="pl-10 bg-background"
-                  />
-                  <div className="absolute left-3 top-2.5 font-bold text-muted-foreground">⚡</div>
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full h-12 text-lg" disabled={!customName || !customCals}>
-                Add to Log <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </form>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>
