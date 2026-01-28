@@ -17,19 +17,32 @@ export interface DailyLog {
   foodId?: string;
   name: string;
   calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
   meal: 'breakfast' | 'lunch' | 'dinner' | 'snack';
   timestamp: number;
 }
 
 export interface UserSettings {
   calorieGoal: number;
+  proteinGoal: number;
+  carbsGoal: number;
+  fatGoal: number;
   name: string;
+  isOnboarded: boolean;
+  isLoggedIn: boolean;
 }
 
 // Default Settings
 const DEFAULT_SETTINGS: UserSettings = {
   calorieGoal: 2000,
-  name: 'Friend',
+  proteinGoal: 150,
+  carbsGoal: 200,
+  fatGoal: 70,
+  name: '',
+  isOnboarded: false,
+  isLoggedIn: false,
 };
 
 // Storage Keys
