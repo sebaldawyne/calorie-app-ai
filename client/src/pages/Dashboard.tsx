@@ -27,6 +27,7 @@ export default function Dashboard() {
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
 
   const remainingCalories = settings.calorieGoal - totals.calories;
+  const deficit = settings.calorieGoal - totals.calories;
   const progress = Math.min((totals.calories / settings.calorieGoal) * 100, 100);
 
   const getMealEmoji = (meal: string) => {
@@ -56,7 +57,7 @@ export default function Dashboard() {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-primary"
+            className="text-primary hover:bg-primary/10"
             onClick={() => setSelectedDate(new Date())}
             disabled={isToday}
           >
@@ -64,7 +65,7 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        <div className="flex justify-between items-center bg-card border rounded-2xl p-2 shadow-sm overflow-x-auto no-scrollbar">
+        <div className="flex justify-between items-center bg-card border rounded-2xl p-2 shadow-sm overflow-x-auto no-scrollbar border-primary/5">
           {calendarDays.map((date) => {
             const isSelected = isSameDay(date, selectedDate);
             const isCurrentDay = isSameDay(date, new Date());
@@ -75,54 +76,65 @@ export default function Dashboard() {
                 onClick={() => setSelectedDate(date)}
                 className={`flex flex-col items-center justify-center min-w-[3rem] py-2 rounded-xl transition-all duration-200 ${
                   isSelected 
-                    ? "bg-primary text-primary-foreground shadow-md scale-105" 
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105" 
                     : "hover:bg-secondary text-muted-foreground"
                 }`}
               >
-                <span className="text-[10px] uppercase font-medium mb-1">{format(date, "EEE")}</span>
+                <span className={`text-[10px] uppercase font-bold mb-1 ${isSelected ? 'text-white/80' : ''}`}>{format(date, "EEE")}</span>
                 <span className="text-lg font-bold">{format(date, "d")}</span>
-                {isCurrentDay && !isSelected && <div className="w-1 h-1 bg-primary rounded-full mt-1" />}
+                {isCurrentDay && !isSelected && <div className="w-1.5 h-1.5 bg-primary rounded-full mt-1" />}
               </button>
             );
           })}
         </div>
       </div>
 
-      <Card className="p-6 bg-gradient-to-br from-primary to-emerald-600 text-white border-none shadow-xl rounded-3xl overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-        <div className="relative z-10 flex flex-col items-center justify-center py-4 space-y-6">
+      <Card className="p-8 bg-gradient-to-br from-primary to-emerald-600 text-white border-none shadow-2xl rounded-[2.5rem] overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-3xl -ml-20 -mb-20"></div>
+        
+        <div className="relative z-10 flex flex-col items-center justify-center py-4 space-y-8">
           <div className="flex flex-col items-center">
-            <span className="text-5xl font-bold tracking-tighter tabular-nums">{remainingCalories}</span>
-            <span className="text-primary-foreground/80 font-medium">calories remaining</span>
+            <span className="text-6xl font-bold tracking-tighter tabular-nums drop-shadow-sm">{remainingCalories}</span>
+            <span className="text-primary-foreground/80 font-semibold uppercase tracking-widest text-xs mt-1">kcal remaining</span>
+            <div className="mt-3 px-4 py-1 bg-white/10 rounded-full backdrop-blur-md border border-white/10">
+              <span className="text-xs font-bold text-white/90">Deficit: {deficit > 0 ? `+${deficit}` : deficit} kcal</span>
+            </div>
           </div>
 
-          <div className="w-full space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm font-medium text-primary-foreground/90 px-1">
+          <div className="w-full space-y-6">
+            <div className="space-y-3">
+              <div className="flex justify-between text-xs font-bold text-primary-foreground/90 px-1 uppercase tracking-widest">
                 <span>{totals.calories} eaten</span>
                 <span>{settings.calorieGoal} goal</span>
               </div>
-              <div className="[&>div>div]:bg-white">
-                <Progress value={progress} className="h-2 bg-black/20" />
+              <div className="[&>div>div]:bg-white shadow-inner rounded-full overflow-hidden">
+                <Progress value={progress} className="h-3 bg-black/20 border-none" />
               </div>
             </div>
 
             {/* Macros Grid */}
-            <div className="grid grid-cols-3 gap-4 border-t border-white/10 pt-4">
-              <div className="text-center">
-                <p className="text-[10px] text-white/60 uppercase tracking-widest font-bold">Protein</p>
-                <p className="text-sm font-bold">{totals.protein}g</p>
-                <Progress value={(totals.protein / settings.proteinGoal) * 100} className="h-1 mt-1 bg-black/20" />
+            <div className="grid grid-cols-3 gap-6 border-t border-white/10 pt-6">
+              <div className="text-center space-y-2">
+                <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-black">Protein</p>
+                <p className="text-lg font-bold tabular-nums">{totals.protein}<span className="text-xs font-normal opacity-70 ml-0.5">g</span></p>
+                <div className="[&>div>div]:bg-white shadow-inner rounded-full overflow-hidden">
+                  <Progress value={(totals.protein / settings.proteinGoal) * 100} className="h-1.5 bg-white/20 border-none" />
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-[10px] text-white/60 uppercase tracking-widest font-bold">Carbs</p>
-                <p className="text-sm font-bold">{totals.carbs}g</p>
-                <Progress value={(totals.carbs / settings.carbsGoal) * 100} className="h-1 mt-1 bg-black/20" />
+              <div className="text-center space-y-2">
+                <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-black">Carbs</p>
+                <p className="text-lg font-bold tabular-nums">{totals.carbs}<span className="text-xs font-normal opacity-70 ml-0.5">g</span></p>
+                <div className="[&>div>div]:bg-white shadow-inner rounded-full overflow-hidden">
+                  <Progress value={(totals.carbs / settings.carbsGoal) * 100} className="h-1.5 bg-white/20 border-none" />
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-[10px] text-white/60 uppercase tracking-widest font-bold">Fat</p>
-                <p className="text-sm font-bold">{totals.fat}g</p>
-                <Progress value={(totals.fat / settings.fatGoal) * 100} className="h-1 mt-1 bg-black/20" />
+              <div className="text-center space-y-2">
+                <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-black">Fat</p>
+                <p className="text-lg font-bold tabular-nums">{totals.fat}<span className="text-xs font-normal opacity-70 ml-0.5">g</span></p>
+                <div className="[&>div>div]:bg-white shadow-inner rounded-full overflow-hidden">
+                  <Progress value={(totals.fat / settings.fatGoal) * 100} className="h-1.5 bg-white/20 border-none" />
+                </div>
               </div>
             </div>
           </div>
@@ -131,47 +143,55 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 gap-4">
         <Link href="/log">
-          <a className="bg-card border border-border/50 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 h-32 hover:bg-secondary/50 transition-colors group">
-            <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
-              <Plus className="w-6 h-6 stroke-[3]" />
+          <span className="bg-card border-none shadow-xl rounded-3xl p-6 flex flex-col items-center justify-center gap-3 h-36 hover:bg-primary/5 transition-all group relative overflow-hidden cursor-pointer">
+            <div className="absolute top-0 left-0 w-1 bg-primary h-full opacity-50 group-hover:opacity-100 transition-opacity"></div>
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm">
+              <Plus className="w-8 h-8 stroke-[3]" />
             </div>
-            <span className="font-semibold">Log Food</span>
-          </a>
+            <span className="font-bold text-foreground tracking-tight">Log Food</span>
+          </span>
         </Link>
-        <div className="bg-card border border-border/50 shadow-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 h-32 opacity-75">
-          <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
-            <Flame className="w-6 h-6 stroke-[3]" />
+        <div className="bg-card border-none shadow-xl rounded-3xl p-6 flex flex-col items-center justify-center gap-3 h-36 opacity-75 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-1 bg-blue-500 h-full opacity-50"></div>
+          <div className="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shadow-sm">
+            <Flame className="w-8 h-8 stroke-[3]" />
           </div>
-          <span className="font-semibold">Burn Cals</span>
+          <span className="font-bold text-foreground tracking-tight">Burn Cals</span>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold flex items-center gap-2">
-            <Clock className="w-5 h-5 text-muted-foreground" />
-            Meals
+        <div className="flex items-center justify-between px-2">
+          <h3 className="text-xl font-black flex items-center gap-2 text-foreground/80 tracking-tight uppercase text-xs">
+            <Clock className="w-4 h-4 text-primary" />
+            Recent Log History
           </h3>
-          <span className="text-xs bg-secondary px-2 py-1 rounded-full">{dayLogs.length} entries</span>
+          <span className="text-[10px] bg-secondary px-3 py-1 rounded-full font-black text-muted-foreground uppercase tracking-widest border border-primary/5">{dayLogs.length} entries</span>
         </div>
 
-        <div className="space-y-3">
-          {dayLogs.slice().reverse().map((log) => (
-            <div key={log.id} className="group flex items-center justify-between p-4 bg-card border border-border/50 rounded-2xl">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-xl">{getMealEmoji(log.meal)}</div>
-                <div>
-                  <h4 className="font-semibold">{log.name}</h4>
-                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                    {log.calories} kcal • P: {log.protein}g C: {log.carbs}g F: {log.fat}g
-                  </p>
-                </div>
-              </div>
-              <button onClick={() => removeLog(log.id)} className="text-muted-foreground hover:text-destructive p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Trash2 className="w-4 h-4" />
-              </button>
+        <div className="space-y-4">
+          {dayLogs.length === 0 ? (
+            <div className="text-center py-10 bg-secondary/20 rounded-[2rem] border-2 border-dashed border-primary/10">
+              <p className="text-muted-foreground font-medium">No meals logged yet.</p>
             </div>
-          ))}
+          ) : (
+            dayLogs.slice().reverse().map((log) => (
+              <div key={log.id} className="group flex items-center justify-between p-5 bg-card border-none shadow-xl rounded-[1.5rem] hover:scale-[1.02] transition-transform">
+                <div className="flex items-center gap-5">
+                  <div className="w-12 h-12 rounded-2xl bg-secondary/50 flex items-center justify-center text-2xl shadow-inner border border-white">{getMealEmoji(log.meal)}</div>
+                  <div>
+                    <h4 className="font-bold text-lg text-foreground tracking-tight">{log.name}</h4>
+                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.15em] mt-0.5">
+                      {log.calories} kcal • P: {log.protein}g C: {log.carbs}g F: {log.fat}g
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => removeLog(log.id)} className="text-muted-foreground/30 hover:text-destructive p-3 opacity-0 group-hover:opacity-100 transition-all hover:bg-destructive/10 rounded-xl">
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

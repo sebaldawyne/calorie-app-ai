@@ -45,14 +45,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 function NavItem({ href, icon: Icon, label, active }: { href: string; icon: any; label: string; active: boolean }) {
   return (
     <Link href={href}>
-      <a className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+      <span className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group cursor-pointer ${
         active 
           ? "bg-primary/10 text-primary font-medium" 
           : "text-muted-foreground hover:bg-secondary hover:text-foreground"
       }`}>
         <Icon className={`w-5 h-5 ${active ? "stroke-[2.5px]" : "stroke-2"}`} />
         {label}
-      </a>
+      </span>
     </Link>
   );
 }
@@ -60,14 +60,14 @@ function NavItem({ href, icon: Icon, label, active }: { href: string; icon: any;
 function MobileNavItem({ href, icon: Icon, label, active }: { href: string; icon: any; label: string; active: boolean }) {
   return (
     <Link href={href}>
-      <a className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
+      <span className={`flex flex-col items-center justify-center w-full h-full space-y-1 cursor-pointer ${
         active ? "text-primary" : "text-muted-foreground"
       }`}>
         <div className={`p-1.5 rounded-full transition-all duration-300 ${active ? "bg-primary/10 -translate-y-1" : ""}`}>
           <Icon className={`w-6 h-6 ${active ? "stroke-[2.5px]" : "stroke-2"}`} />
         </div>
         <span className="text-[10px] font-medium">{label}</span>
-      </a>
+      </span>
     </Link>
   );
 }
