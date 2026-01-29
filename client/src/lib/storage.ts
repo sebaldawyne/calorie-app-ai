@@ -30,8 +30,16 @@ export interface UserSettings {
   carbsGoal: number;
   fatGoal: number;
   name: string;
+  email: string;
+  weight: string;
+  height: string;
+  age: string;
+  gender: string;
+  activityLevel: string;
+  goalType: 'lose weight' | 'gain weight' | 'maintain';
   isOnboarded: boolean;
   isLoggedIn: boolean;
+  isPro: boolean;
 }
 
 // Default Settings
@@ -41,8 +49,16 @@ const DEFAULT_SETTINGS: UserSettings = {
   carbsGoal: 200,
   fatGoal: 70,
   name: '',
+  email: '',
+  weight: '',
+  height: '',
+  age: '',
+  gender: '',
+  activityLevel: 'sedentary',
+  goalType: 'maintain',
   isOnboarded: false,
   isLoggedIn: false,
+  isPro: false,
 };
 
 // Storage Keys
@@ -110,7 +126,13 @@ export function useSettings() {
     localStorage.setItem(KEYS.SETTINGS, JSON.stringify(updated));
   };
 
-  return { settings, updateSettings };
+  const logout = () => {
+    const updated = { ...settings, isLoggedIn: false };
+    setSettings(updated);
+    localStorage.setItem(KEYS.SETTINGS, JSON.stringify(updated));
+  };
+
+  return { settings, updateSettings, logout };
 }
 
 export function useCustomFoods() {

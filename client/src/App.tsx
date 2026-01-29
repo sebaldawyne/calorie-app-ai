@@ -7,24 +7,33 @@ import NotFound from "@/pages/not-found";
 import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import LogFood from "@/pages/LogFood";
-import Stats from "@/pages/Stats";
+import Progress from "@/pages/Progress";
 import Settings from "@/pages/Settings";
 import Onboarding from "@/pages/Onboarding";
 import Login from "@/pages/Login";
+import Paywall from "@/pages/Paywall";
 import { useSettings } from "@/lib/storage";
 
 function Router() {
   const { settings } = useSettings();
 
+  const isAuthPage = window.location.pathname.startsWith('/login') || window.location.pathname.startsWith('/onboarding');
+
   // Protect routes
-  if (!settings.isLoggedIn && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/onboarding')) {
+  if (!settings.isLoggedIn && !isAuthPage) {
     return <Redirect to="/login" />;
+  }
+
+  // Handle authenticated users on auth pages
+  if (settings.isLoggedIn && isAuthPage) {
+    return <Redirect to="/" />;
   }
 
   return (
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/onboarding" component={Onboarding} />
+      <Route path="/paywall" component={Paywall} />
       <Route path="/">
         <Layout>
           <Dashboard />
@@ -37,7 +46,7 @@ function Router() {
       </Route>
       <Route path="/stats">
         <Layout>
-          <Stats />
+          <Progress />
         </Layout>
       </Route>
       <Route path="/settings">
