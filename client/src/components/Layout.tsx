@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, PlusCircle, BarChart2, Settings, Utensils } from "lucide-react";
+import { Home, PlusCircle, BarChart2, Settings, Utensils, Book, Bell } from "lucide-react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -10,16 +10,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background pb-24 md:pb-0 md:pl-64 transition-all duration-300">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 border-r bg-card/50 backdrop-blur-xl z-50">
-        <div className="p-6">
+        <div className="p-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
             <Utensils className="w-6 h-6" />
             CalorieSnap
           </h1>
+          <button className="text-white hover:text-primary transition-colors">
+            <Bell className="w-5 h-5" />
+          </button>
         </div>
         <nav className="flex-1 px-4 space-y-2">
           <NavItem href="/" icon={Home} label="Dashboard" active={isActive("/")} />
           <NavItem href="/log" icon={PlusCircle} label="Log Food" active={isActive("/log")} />
-          <NavItem href="/stats" icon={BarChart2} label="Statistics" active={isActive("/stats")} />
+          <NavItem href="/diary" icon={Book} label="Food Diary" active={isActive("/diary")} />
+          <NavItem href="/stats" icon={BarChart2} label="Progress" active={isActive("/stats")} />
           <NavItem href="/settings" icon={Settings} label="Settings" active={isActive("/settings")} />
         </nav>
       </aside>
@@ -30,11 +34,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t z-50 pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-lg border-t z-50 pb-safe">
         <div className="flex justify-around items-center h-16 px-2">
           <MobileNavItem href="/" icon={Home} label="Home" active={isActive("/")} />
           <MobileNavItem href="/log" icon={PlusCircle} label="Log" active={isActive("/log")} />
-          <MobileNavItem href="/stats" icon={BarChart2} label="Stats" active={isActive("/stats")} />
+          <MobileNavItem href="/diary" icon={Book} label="Diary" active={isActive("/diary")} />
+          <MobileNavItem href="/stats" icon={BarChart2} label="Progress" active={isActive("/stats")} />
           <MobileNavItem href="/settings" icon={Settings} label="Settings" active={isActive("/settings")} />
         </div>
       </nav>
@@ -47,8 +52,8 @@ function NavItem({ href, icon: Icon, label, active }: { href: string; icon: any;
     <Link href={href}>
       <span className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group cursor-pointer ${
         active 
-          ? "bg-primary/10 text-primary font-medium" 
-          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+          ? "bg-primary text-white font-medium shadow-lg shadow-primary/20" 
+          : "text-muted-foreground hover:bg-secondary hover:text-white"
       }`}>
         <Icon className={`w-5 h-5 ${active ? "stroke-[2.5px]" : "stroke-2"}`} />
         {label}
@@ -66,7 +71,7 @@ function MobileNavItem({ href, icon: Icon, label, active }: { href: string; icon
         <div className={`p-1.5 rounded-full transition-all duration-300 ${active ? "bg-primary/10 -translate-y-1" : ""}`}>
           <Icon className={`w-6 h-6 ${active ? "stroke-[2.5px]" : "stroke-2"}`} />
         </div>
-        <span className="text-[10px] font-medium">{label}</span>
+        <span className="text-[10px] font-medium tracking-tight">{label}</span>
       </span>
     </Link>
   );

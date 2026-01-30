@@ -12,6 +12,8 @@ import Settings from "@/pages/Settings";
 import Onboarding from "@/pages/Onboarding";
 import Login from "@/pages/Login";
 import Paywall from "@/pages/Paywall";
+import Profile from "@/pages/Profile";
+import FoodDiary from "@/pages/FoodDiary";
 import { useSettings } from "@/lib/storage";
 
 function Router() {
@@ -44,6 +46,11 @@ function Router() {
           <LogFood />
         </Layout>
       </Route>
+      <Route path="/diary">
+        <Layout>
+          <FoodDiary />
+        </Layout>
+      </Route>
       <Route path="/stats">
         <Layout>
           <Progress />
@@ -52,6 +59,11 @@ function Router() {
       <Route path="/settings">
         <Layout>
           <Settings />
+        </Layout>
+      </Route>
+      <Route path="/profile">
+        <Layout>
+          <Profile />
         </Layout>
       </Route>
       <Route component={NotFound} />

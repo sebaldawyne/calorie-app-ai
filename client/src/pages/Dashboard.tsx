@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useLogs, useSettings } from "@/lib/storage";
 import { format, addDays, startOfWeek, isSameDay } from "date-fns";
 import { Link } from "wouter";

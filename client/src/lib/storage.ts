@@ -40,6 +40,7 @@ export interface UserSettings {
   isOnboarded: boolean;
   isLoggedIn: boolean;
   isPro: boolean;
+  profilePhoto?: string;
 }
 
 // Default Settings
@@ -107,7 +108,11 @@ export function useLogs() {
     return logs.filter(log => log.date === date);
   };
 
-  return { logs, addLog, removeLog, resetLogs, getLogsByDate };
+  const getAllLogs = () => {
+    return logs;
+  };
+
+  return { logs, addLog, removeLog, resetLogs, getLogsByDate, getAllLogs };
 }
 
 export function useSettings() {

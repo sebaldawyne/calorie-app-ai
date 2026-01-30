@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useSettings } from "@/lib/storage";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";

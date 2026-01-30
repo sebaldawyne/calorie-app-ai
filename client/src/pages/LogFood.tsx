@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useLogs, useCustomFoods } from "@/lib/storage";
 import { COMMON_FOODS } from "@/lib/mock-data";
 import { useLocation } from "wouter";
