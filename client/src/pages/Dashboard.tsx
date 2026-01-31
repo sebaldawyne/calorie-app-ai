@@ -7,6 +7,47 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+function CircularProgress({ value, color, label, unit, current }: { value: number, color: string, label: string, unit: string, current: number }) {
+  const radius = 36;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.min(value, 100) / 100) * circumference;
+  
+  return (
+    <div className="flex flex-col items-center space-y-2">
+      <div className="relative w-24 h-24">
+        <svg className="w-full h-full transform -rotate-90">
+          <circle
+            cx="48"
+            cy="48"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="8"
+            fill="transparent"
+            className="text-white/10"
+          />
+          <circle
+            cx="48"
+            cy="48"
+            r={radius}
+            stroke={color}
+            strokeWidth="8"
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-500 ease-out"
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-lg font-bold tabular-nums leading-none">{current}</span>
+          <span className="text-[10px] opacity-70">{unit}</span>
+        </div>
+      </div>
+      <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-black">{label}</p>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { logs, removeLog, getLogsByDate } = useLogs();
   const { settings } = useSettings();
@@ -114,28 +155,28 @@ export default function Dashboard() {
             </div>
 
             {/* Macros Grid */}
-            <div className="grid grid-cols-3 gap-6 border-t border-white/10 pt-6">
-              <div className="text-center space-y-2">
-                <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-black">Protein</p>
-                <p className="text-lg font-bold tabular-nums">{totals.protein}<span className="text-xs font-normal opacity-70 ml-0.5">g</span></p>
-                <div className="[&>div>div]:bg-white shadow-inner rounded-full overflow-hidden">
-                  <Progress value={(totals.protein / settings.proteinGoal) * 100} className="h-1.5 bg-white/20 border-none" />
-                </div>
-              </div>
-              <div className="text-center space-y-2">
-                <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-black">Carbs</p>
-                <p className="text-lg font-bold tabular-nums">{totals.carbs}<span className="text-xs font-normal opacity-70 ml-0.5">g</span></p>
-                <div className="[&>div>div]:bg-white shadow-inner rounded-full overflow-hidden">
-                  <Progress value={(totals.carbs / settings.carbsGoal) * 100} className="h-1.5 bg-white/20 border-none" />
-                </div>
-              </div>
-              <div className="text-center space-y-2">
-                <p className="text-[10px] text-white/70 uppercase tracking-[0.2em] font-black">Fat</p>
-                <p className="text-lg font-bold tabular-nums">{totals.fat}<span className="text-xs font-normal opacity-70 ml-0.5">g</span></p>
-                <div className="[&>div>div]:bg-white shadow-inner rounded-full overflow-hidden">
-                  <Progress value={(totals.fat / settings.fatGoal) * 100} className="h-1.5 bg-white/20 border-none" />
-                </div>
-              </div>
+            <div className="grid grid-cols-3 gap-4 border-t border-white/10 pt-8">
+              <CircularProgress 
+                label="Protein" 
+                current={totals.protein} 
+                unit="g" 
+                value={(totals.protein / settings.proteinGoal) * 100} 
+                color="#ef4444" // Red
+              />
+              <CircularProgress 
+                label="Carbs" 
+                current={totals.carbs} 
+                unit="g" 
+                value={(totals.carbs / settings.carbsGoal) * 100} 
+                color="#eab308" // Yellow
+              />
+              <CircularProgress 
+                label="Fat" 
+                current={totals.fat} 
+                unit="g" 
+                value={(totals.fat / settings.fatGoal) * 100} 
+                color="#39ff14" // Neon Green
+              />
             </div>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { 
   User, Target, Ruler, Camera, Save, ArrowLeft, 
-  Settings as SettingsIcon, LogOut, ChevronRight, Weight
+  Settings as SettingsIcon, LogOut, ChevronRight, Weight, CreditCard
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
@@ -21,13 +21,14 @@ export default function Profile() {
   const [, setLocation] = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [name, setName] = useState(settings.name);
-  const [goal, setGoal] = useState(settings.calorieGoal.toString());
-  const [weight, setWeight] = useState(settings.weight);
-  const [height, setHeight] = useState(settings.height);
-  const [age, setAge] = useState(settings.age);
-  const [gender, setGender] = useState(settings.gender);
-  const [goalType, setGoalType] = useState(settings.goalType);
+  // Read-only values from settings
+  const name = settings.name;
+  const goal = settings.calorieGoal.toString();
+  const weight = settings.weight;
+  const height = settings.height;
+  const age = settings.age;
+  const gender = settings.gender;
+  const goalType = settings.goalType;
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const dayLogs = getLogsByDate(today);
@@ -37,19 +38,6 @@ export default function Profile() {
     carbs: acc.carbs + (log.carbs || 0),
     fat: acc.fat + (log.fat || 0),
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
-
-  const handleSave = () => {
-    updateSettings({
-      name,
-      calorieGoal: parseInt(goal) || 2000,
-      weight,
-      height,
-      age,
-      gender,
-      goalType: goalType as any
-    });
-    toast({ title: "Profile Updated", description: "Your details have been saved." });
-  };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -62,13 +50,22 @@ export default function Profile() {
     }
   };
 
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const handlePayment = () => {
+    setProcessingPayment(true);
+    setTimeout(() => {
+      setProcessingPayment(false);
+      toast({ title: "Subscription Active", description: "Your premium features are now unlocked." });
+    }, 2000);
+  };
+
   return (
     <div className="space-y-8 pb-24">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => setLocation("/settings")} className="rounded-full">
+        <Button variant="ghost" size="icon" onClick={() => setLocation("/")} className="rounded-full">
           <ArrowLeft className="w-6 h-6" />
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight text-white">Profile</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile</h1>
       </div>
 
       {/* Profile Photo Section */}
@@ -78,7 +75,7 @@ export default function Profile() {
             {settings.profilePhoto ? (
               <img src={settings.profilePhoto} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-white/20">
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground/20">
                 <User className="w-16 h-16" />
               </div>
             )}
@@ -98,12 +95,31 @@ export default function Profile() {
           />
         </div>
         <div className="text-center">
-          <h2 className="text-2xl font-black text-white">{settings.name || "User"}</h2>
+          <h2 className="text-2xl font-black text-foreground">{settings.name || "User"}</h2>
           <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">{settings.goalType}</p>
         </div>
       </div>
 
       <div className="grid gap-8">
+        {/* Payment Processor Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-2 px-2">
+            <CreditCard className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-black text-muted-foreground uppercase tracking-[0.2em]">Subscription</h3>
+          </div>
+          <Card className="p-8 bg-gradient-to-br from-primary/10 to-accent/10 border-none shadow-xl rounded-[2.5rem]">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-bold text-lg">Premium Plan</p>
+                <p className="text-sm text-muted-foreground">$9.99/month for unlimited tracking</p>
+              </div>
+              <Button onClick={handlePayment} disabled={processingPayment} className="rounded-xl px-6 h-12 font-bold shadow-lg shadow-primary/20">
+                {processingPayment ? "Processing..." : "Upgrade Now"}
+              </Button>
+            </div>
+          </Card>
+        </div>
+
         {/* Personal Info */}
         <div className="space-y-6">
           <div className="flex items-center gap-2 px-2">
@@ -113,26 +129,23 @@ export default function Profile() {
           <Card className="p-8 space-y-6 bg-card border-none shadow-2xl rounded-[2.5rem]">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Display Name</Label>
-                <Input value={name} onChange={e => setName(e.target.value)} className="h-12 bg-background border-none rounded-xl text-white font-bold" />
+                <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Display Name</Label>
+                <div className="h-12 flex items-center px-4 bg-secondary/50 rounded-xl text-foreground font-bold border border-border/50">
+                  {name}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Gender</Label>
-                  <Select value={gender} onValueChange={setGender}>
-                    <SelectTrigger className="h-12 bg-background border-none rounded-xl text-white font-bold">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Gender</Label>
+                  <div className="h-12 flex items-center px-4 bg-secondary/50 rounded-xl text-foreground font-bold border border-border/50 capitalize">
+                    {gender}
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Age</Label>
-                  <Input type="number" value={age} onChange={e => setAge(e.target.value)} className="h-12 bg-background border-none rounded-xl text-white font-bold" />
+                  <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Age</Label>
+                  <div className="h-12 flex items-center px-4 bg-secondary/50 rounded-xl text-foreground font-bold border border-border/50">
+                    {age}
+                  </div>
                 </div>
               </div>
             </div>
@@ -148,23 +161,23 @@ export default function Profile() {
           <Card className="p-8 space-y-6 bg-card border-none shadow-2xl rounded-[2.5rem]">
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-1">
-                <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Calories</p>
-                <p className="text-2xl font-black text-white">{totals.calories}</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Calories</p>
+                <p className="text-2xl font-black text-foreground">{totals.calories}</p>
                 <p className="text-[9px] text-primary font-bold">Goal: {settings.calorieGoal}</p>
               </div>
               <div className="space-y-1 text-right">
-                <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Protein</p>
-                <p className="text-2xl font-black text-white">{totals.protein}g</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Protein</p>
+                <p className="text-2xl font-black text-foreground">{totals.protein}g</p>
                 <p className="text-[9px] text-primary font-bold">Goal: {settings.proteinGoal}g</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Carbs</p>
-                <p className="text-2xl font-black text-white">{totals.carbs}g</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Carbs</p>
+                <p className="text-2xl font-black text-foreground">{totals.carbs}g</p>
                 <p className="text-[9px] text-primary font-bold">Goal: {settings.carbsGoal}g</p>
               </div>
               <div className="space-y-1 text-right">
-                <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Fats</p>
-                <p className="text-2xl font-black text-white">{totals.fat}g</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Fats</p>
+                <p className="text-2xl font-black text-foreground">{totals.fat}g</p>
                 <p className="text-[9px] text-primary font-bold">Goal: {settings.fatGoal}g</p>
               </div>
             </div>
@@ -180,33 +193,30 @@ export default function Profile() {
           <Card className="p-8 space-y-6 bg-card border-none shadow-2xl rounded-[2.5rem]">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Height (cm)</Label>
-                <Input type="number" value={height} onChange={e => setHeight(e.target.value)} className="h-12 bg-background border-none rounded-xl text-white font-bold" />
+                <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Height (cm)</Label>
+                <div className="h-12 flex items-center px-4 bg-secondary/50 rounded-xl text-foreground font-bold border border-border/50">
+                  {height}
+                </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Weight (kg)</Label>
-                <Input type="number" value={weight} onChange={e => setWeight(e.target.value)} className="h-12 bg-background border-none rounded-xl text-white font-bold" />
+                <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Weight (kg)</Label>
+                <div className="h-12 flex items-center px-4 bg-secondary/50 rounded-xl text-foreground font-bold border border-border/50">
+                  {weight}
+                </div>
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-white/60 font-bold uppercase text-[10px] tracking-widest">Weight Goal</Label>
-              <Select value={goalType} onValueChange={setGoalType as any}>
-                <SelectTrigger className="h-12 bg-background border-none rounded-xl text-white font-bold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="lose weight">Lose Weight</SelectItem>
-                  <SelectItem value="maintain">Maintain</SelectItem>
-                  <SelectItem value="gain weight">Gain Weight</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Weight Goal</Label>
+              <div className="h-12 flex items-center px-4 bg-secondary/50 rounded-xl text-foreground font-bold border border-border/50 capitalize">
+                {goalType}
+              </div>
             </div>
           </Card>
         </div>
-
-        <Button onClick={handleSave} className="w-full h-16 text-lg font-black rounded-2xl shadow-xl shadow-primary/20">
-          <Save className="w-5 h-5 mr-2" /> Save Profile
-        </Button>
+        
+        <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-widest px-8">
+          Note: Profile details are automatically updated based on your weekly statistics and activity.
+        </p>
       </div>
     </div>
   );
