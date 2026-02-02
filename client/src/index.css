@@ -4,8 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: 'Inter', sans-serif;
-  --font-display: 'Outfit', sans-serif;
+  --font-sans: 'Arial', sans-serif;
+  --font-display: 'Arial', sans-serif;
   
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;

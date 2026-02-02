@@ -34,19 +34,19 @@ export default function Settings() {
 
   return (
     <div className="space-y-8 pb-24">
-      <h1 className="text-3xl font-bold tracking-tight text-white">Settings</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">Settings</h1>
 
       {/* Profile Navigation */}
       <Card 
         onClick={() => setLocation("/profile")}
-        className="p-6 border-none bg-card shadow-xl rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white/5 transition-all group"
+        className="p-6 border-none bg-card shadow-xl rounded-3xl flex items-center justify-between cursor-pointer hover:bg-secondary/50 transition-all group"
       >
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
             <User className="w-7 h-7" />
           </div>
           <div>
-            <h3 className="font-black text-lg text-white">Profile Details</h3>
+            <h3 className="font-black text-lg text-foreground">Profile Details</h3>
             <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Personal Info, Targets, Body Specs</p>
           </div>
         </div>
@@ -71,22 +71,22 @@ export default function Settings() {
       {/* App Settings */}
       <div className="space-y-4">
         <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] px-2">Preferences</h3>
-        <Card className="divide-y divide-white/5 border-none bg-card shadow-xl rounded-3xl overflow-hidden">
+        <Card className="divide-y divide-border border-none bg-card shadow-xl rounded-3xl overflow-hidden">
           <div className="p-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400">
+              <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
                 <Bell className="w-5 h-5" />
               </div>
-              <span className="font-bold text-white">Smart Notifications</span>
+              <span className="font-bold text-foreground">Smart Notifications</span>
             </div>
             <Switch checked={notifs} onCheckedChange={setNotifs} />
           </div>
           <div className="p-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
+              <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-600">
                 <Shield className="w-5 h-5" />
               </div>
-              <span className="font-bold text-white">Privacy Lock</span>
+              <span className="font-bold text-foreground">Privacy Lock</span>
             </div>
             <Switch />
           </div>
@@ -95,15 +95,15 @@ export default function Settings() {
 
       <div className="space-y-4 pt-4">
         <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] px-2 text-destructive">Danger Zone</h3>
-        <Card className="divide-y divide-white/5 border-none bg-destructive/5 shadow-xl rounded-3xl overflow-hidden">
+        <Card className="divide-y divide-border border-none bg-destructive/5 shadow-xl rounded-3xl overflow-hidden">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="w-full p-6 flex items-center justify-between hover:bg-destructive/5 transition-all">
+              <button className="w-full p-6 flex items-center justify-between hover:bg-destructive/5 transition-all text-left">
                 <div className="flex items-center gap-4">
                   <div className="p-2.5 rounded-xl bg-destructive/10 text-destructive">
                     <Database className="w-5 h-5" />
                   </div>
-                  <span className="font-bold text-white">Wipe All Data</span>
+                  <span className="font-bold text-foreground">Wipe All Data</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
@@ -121,19 +121,19 @@ export default function Settings() {
           </AlertDialog>
           <button 
             onClick={handleLogout}
-            className="w-full p-6 flex items-center justify-between hover:bg-destructive/5 transition-all"
+            className="w-full p-6 flex items-center justify-between hover:bg-destructive/5 transition-all text-left"
           >
             <div className="flex items-center gap-4">
               <div className="p-2.5 rounded-xl bg-destructive/10 text-destructive">
                 <LogOut className="w-5 h-5" />
               </div>
-              <span className="font-bold text-white">Sign Out</span>
+              <span className="font-bold text-foreground">Sign Out</span>
             </div>
           </button>
         </Card>
       </div>
 
-      <div className="text-center text-xs text-white/20 pt-8 uppercase font-black tracking-widest">
+      <div className="text-center text-xs text-muted-foreground pt-8 uppercase font-black tracking-widest">
         CalorieSnap v1.1.0 • Built for Fitness
       </div>
     </div>

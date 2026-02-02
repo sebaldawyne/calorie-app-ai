@@ -2,7 +2,7 @@ import { useLogs, useSettings } from "@/lib/storage";
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, ReferenceLine, LineChart, Line, CartesianGrid } from "recharts";
 import { Card } from "@/components/ui/card";
-import { ArrowUp, ArrowDown, TrendingUp, Scale } from "lucide-react";
+import { ArrowUp, ArrowDown, TrendingUp, Scale, Weight } from "lucide-react";
 
 export default function Stats() {
   const { logs } = useLogs();
@@ -69,7 +69,7 @@ export default function Stats() {
           <div className="relative z-10">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Current BMI</span>
             <div className="mt-1">
-              <span className="text-3xl font-bold">{bmi}</span>
+              <span className="text-3xl font-bold text-foreground">{bmi}</span>
             </div>
             <div className={`mt-2 px-2 py-0.5 rounded-full inline-block ${bmiCat.bg}`}>
               <span className={`text-[10px] font-bold uppercase tracking-wider ${bmiCat.color}`}>{bmiCat.label}</span>
@@ -78,10 +78,26 @@ export default function Stats() {
           <Scale className="absolute right-[-10px] bottom-[-10px] w-20 h-20 text-muted/20 rotate-12" />
         </Card>
         
-        <Card className="p-4 flex flex-col justify-between h-32 border-l-4 border-l-accent">
+        <Card className="p-4 flex flex-col justify-between h-32 border-l-4 border-l-orange-500 relative overflow-hidden">
+          <div className="relative z-10">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Start Weight</span>
+            <div className="mt-1">
+              <span className="text-3xl font-bold text-foreground">{settings.weight || "--"}</span>
+              <span className="text-xs text-muted-foreground ml-1">kg</span>
+            </div>
+            <div className="mt-2 px-2 py-0.5 rounded-full inline-block bg-orange-500/10">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600">Baseline</span>
+            </div>
+          </div>
+          <Weight className="absolute right-[-10px] bottom-[-10px] w-20 h-20 text-muted/20 rotate-12" />
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <Card className="p-4 flex flex-col justify-between h-24 border-l-4 border-l-accent">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Daily Goal</span>
           <div>
-            <span className="text-3xl font-bold">{settings.calorieGoal}</span>
+            <span className="text-3xl font-bold text-foreground">{settings.calorieGoal}</span>
             <span className="text-xs text-muted-foreground ml-1">kcal</span>
           </div>
         </Card>
